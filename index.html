@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html dir="ltr">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
+    <title>WIDGETS VISOR RUBEN GARZON VERA</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.20/dijit/themes/claro/claro.css">
+    <link rel="stylesheet" href="https://js.arcgis.com/3.20/esri/themes/calcite/dijit/calcite.css">
+    <link rel="stylesheet" href="https://js.arcgis.com/3.20/esri/css/esri.css">
+
+    <style>
+    html, body, .container {
+      height:100%;
+      width:100%;
+      margin:0;
+      padding:0;
+    }
+    #map {
+      height: 100%;
+      wigth: 100%;
+      margin: 0;
+      padding:0;
+    }
+    #search {
+      display: block;
+      position: absolute;
+      z-index: 2;
+      top: 20px;
+      left: 74px;
+    }
+    #layerListPane{
+      width:25%;
+    }
+    #layerList{
+      display: block;
+      position: absolute;
+      z-index: 2;
+      top: 5px;
+      right: 5px;
+    }
+    #scaleBarDiv{
+      display: block;
+      position: absolute;
+      z-index: 2;
+      bottom: 20px;
+      left: 120px;
+    }
+    #HomeButton {
+      position: absolute;
+      top: 95px;
+      left: 20px;
+      z-index: 50;
+    }
+    #BasemapToggle {
+      position: absolute;
+      bottom: 60px;
+      right: 20px;
+      z-index: 50;
+    }
+    #layerList {
+      display: block;
+      position: absolute;
+      z-index: 2;
+      top: 195px;
+      right: 5px;
+      }
+
+
+    </style>
+    <script> var dojoConfig = { parseOnLoad: true};</script>
+    <script src="https://js.arcgis.com/3.19/"></script>
+    <script>
+      var map;
+
+      require(["esri/map", "esri/layers/ArcGISDynamicMapServiceLayer","esri/arcgis/utils", "esri/dijit/LayerList","esri/dijit/Search",
+      "esri/layers/FeatureLayer", "esri/InfoTemplate", "esri/dijit/HomeButton","esri/dijit/BasemapToggle",
+      "esri/dijit/Scalebar", "esri/dijit/OverviewMap", "dijit/layout/BorderContainer", "dijit/layout/ContentPane", "dojo/domReady!"],
+      function(Map, ArcGISDynamicMapServiceLayer, arcgisUtils, LayerList, Search, FeatureLayer, InfoTemplate, HomeButton,
+        BasemapToggle, Scalebar, OverviewMap) {
+        map = new Map("map", {
+          basemap: "hybrid",
+          center: [-95.67, 38.25],
+          zoom: 5
+        });
+        //Creamos ArcGISDynamicMapServiceLayer
+        dynamic = new ArcGISDynamicMapServiceLayer("http://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer",{
+          id: "Capas",
+        })
+        //La añadimos al mapa
+        map.addLayer(dynamic);
+
+        //Creamos LayerList y lo lanzamos
+        var layerList = new LayerList({
+          map: map,
+          showLegend: true,
+          showSubLayers: true,
+          showOpacitySlider: true,
+          layers:  [
+          {
+            layer: dynamic,
+            showSubLayers: true,
+            showLegend: true,
+            showOpacitySlider: true,
+            visibility: true},
+          ]
+      },"layerList");
+      layerList.startup();
+
+        //Creamos search con infoTemplate
+        var search = new Search({
+          map: map,
+          enableButtonMode: true,
+          enableInfoWindow: true,
+          expanded: true,
+          showInfoWindowOnSelect: true,
+          }, "search");
+
+          var sources = search.get("sources");
+
+          sources.push({
+            featureLayer: new FeatureLayer("http://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer/0"),
+            searchFields: ["areaname"],
+            displayField: "areaname",
+            exactMatch: false,
+            name: "Cities",
+            outFields: ["*"],
+            placeholder: "Introduce Ciudad",
+            maxResults: 3,
+            maxSuggestions: 3,
+            enableSuggestions: true,
+            infoTemplate: new InfoTemplate("Ciudad", "areaname: ${areaname}<br>Capital: ${capital}<br>Poblacion: ${pop2000}<br>Area: ${shape}"),
+          },{
+          featureLayer: new FeatureLayer("http://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer/2"),
+          searchFields: ["state_name"],
+          displayField: "state_name",
+          exactMatch: false,
+          name: "States",
+          outFields: ["*"],
+          placeholder: "Introduce Estado",
+          maxResults: 3,
+          maxSuggestions: 3,
+          enableSuggestions: true,
+          infoTemplate: new InfoTemplate("Estado", "Estado: ${state_name}<br>Region: ${sub_region}<br>Poblacion: ${pop2000}<br>Area: ${shape}"),
+        });
+
+          search.set("sources", sources);
+          search.startup();
+
+          //Creamos homeButton
+          var homeButton = new HomeButton({
+            theme: "HomeButton",
+            map: map,
+            extent: null,
+            visible: true
+            }, "HomeButton");
+            homeButton.startup();
+
+          //Creamos BasemapToggle
+          var toggle = new BasemapToggle({
+            map: map,
+            basemap: "gray"
+            }, "BasemapToggle");
+            toggle.startup();
+
+          //Creamos Scalebar
+          var scalebar = new Scalebar({
+            map: map,
+            scalebarUnit: "metric"
+            });
+
+          //Creamos OverviewMap
+          var overviewMapDijit = new OverviewMap({
+            map: map,
+            visible: true
+            });
+            overviewMapDijit.startup();
+
+
+
+    });
+    </script>
+    </head>
+    <body>
+       <div id="search"></div>
+       <div id="map">
+          <div id="BasemapToggle"></div>
+          <div id="HomeButton"></div>
+          <div id="scaleBarDiv"></div>
+       </div>
+       <div id="layerListPane">
+          <div id="layerList"></div>
+       </div>
+    </body>
+</html>
